@@ -1,0 +1,13 @@
+{
+    "data_file": "/home/7ry/Data/ellora/ChatKokkos-data/kokkos_dataset_before_reinforcement.json",
+    "base_model_path": "/auto/projects/ChatHPC/models/cache/meta-llama/CodeLlama-7b-hf",
+    "finetuned_model_path": "peft_adapter",
+    "merged_model_path": "merged_adapters",
+    "training_output_dir": "kokkos-code-llama",
+    "max_response_tokens": 600,
+    "max_training_tokens": 512,
+    "prompt_history_file": "~/.chatkokkos_history",
+    "prompt_template_file": "prompt_template.txt",
+    "prompt_template": null,
+    "use_wandb": false
+}

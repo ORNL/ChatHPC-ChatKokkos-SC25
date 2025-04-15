@@ -1,0 +1,123 @@
+stages:
+  - build
+  - check_format
+  - docs
+  - test
+  - check_coverage
+  - deploy_coverage
+  - deploy_docs
+
+variables:
+  HATCH_DATA_DIR: ".hatch"
+
+before_script:
+  - python3 -m venv --upgrade-deps .venv
+  - source .venv/bin/activate
+
+.zenith:
+  tags: [ubuntu, zenith]
+
+build-job:
+  extends: [.zenith]
+  stage: build
+  script:
+    - pip install .
+    - python3 -c "import chathpc.app; print(chathpc.app.__doc__)"
+
+check_format-job:
+  extends: [.zenith]
+  stage: check_format
+  needs: []
+  script:
+    - pip install --upgrade hatch
+    - pip install --upgrade hatch-mkdocs
+    - (hatch fmt | tee fmt.out && echo "lint_errors 0" > metrics.txt) || (cat fmt.out | grep -e 'Found .* errors' | sed 's/Found \(.*\) errors.*/lint_errors \1/' > metrics.txt)
+    - cat metrics.txt
+    - grep -q "lint_errors 0" metrics.txt
+  artifacts:
+    paths:
+      - fmt.out
+      - metrics.txt
+    reports:
+      metrics: metrics.txt
+  allow_failure:
+    exit_codes:
+      - 1
+
+docs-job:
+  tags: [devdocs]
+  stage: docs
+  needs: []
+  script:
+    - pip install --upgrade hatch
+    - hatch run docs:build
+  artifacts:
+    paths:
+      - site
+
+test-job:
+  extends: [.zenith]
+  stage: test
+  needs: [build-job]
+  script:
+    - pip install --upgrade hatch
+    - hatch run test
+
+test-scripts:
+  extends: [.zenith]
+  stage: test
+  script:
+    - pip install .
+    - ./scripts/test_commands.sh
+
+coverage-job:
+  extends: [.zenith]
+  stage: check_coverage
+  needs: [build-job]
+  script:
+    - pip install --upgrade hatch
+    - hatch run cov-html
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    paths:
+      - coverage_html_report
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+.deploy_coverage_common:
+  tags: [devdocs]
+  stage: deploy_coverage
+  needs: [coverage-job]
+  script:
+    - rsync -a --delete coverage_html_report/ ~/www/ChatHPC/ChatHPC-app/coverage
+
+deploy_coverage-job:
+  extends: .deploy_coverage_common
+  only:
+    - main@ChatHPC/ChatHPC-app
+
+deploy_coverage_manual-job:
+  extends: .deploy_coverage_common
+  when: manual
+  only:
+    - branches@ChatHPC/ChatHPC-app
+
+.deploy_docs_common:
+  tags: [devdocs]
+  stage: deploy_docs
+  needs: [docs-job]
+  script:
+    - rsync -a --delete site/ ~/www/ChatHPC/ChatHPC-app
+
+deploy_docs-job:
+  extends: .deploy_docs_common
+  only:
+    - main@ChatHPC/ChatHPC-app
+
+deploy_docs_manual-job:
+  extends: .deploy_docs_common
+  when: manual
+  only:
+    - branches@ChatHPC/ChatHPC-app

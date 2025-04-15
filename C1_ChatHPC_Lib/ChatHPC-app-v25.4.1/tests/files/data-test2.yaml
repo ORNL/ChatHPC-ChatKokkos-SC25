@@ -1,0 +1,49 @@
+- prompt: |-
+    Line one
+    Line two
+  response: |-
+    First
+    Second
+    Third
+  context: |-
+    Single line
+- prompt: |-
+    Vectorize the following code snippet using SIMD instructions.
+
+    Original Code:
+    ```c
+    for(int i=0; i< M; i++)
+    {
+        for(int j=0; j< N; j++)
+        {
+            C[i*N + j] = A[i] * B[j];
+        }
+    }
+    ```
+
+  context: 'Vector ISA: AVX2'
+  response: |-
+    Analysis:
+    - The loop body is "C[i*N + j] = A[i] * B[j];".
+    - The same value of A is used across all iterations of the inner loop.
+    - So the elements of A can be broadcasted, outside the inner loop.
+    - The inner loop can be vectorized by loading 8 elements from B, multiplying with the broadcasted A, then storing in C.
+    - The loop is then incremented by vector length.
+
+    Vectorized Code:
+    ```c
+    for(int i=0; i< M; i++)
+    {
+        //Broadcast A[i]
+        __m256 a = _mm256_broadcast_ss(&A[i]);
+        for(int j=0; j< N; j+=8)
+        {
+            //Load 8 elements from B
+            __m256 b = _mm256_loadu_ps(&B[j]);
+            //Multiply with A[i]
+            __m256 c = _mm256_mul_ps(a, b);
+            //Store the result
+            _mm256_storeu_ps(&C[i*N + j], c);
+        }
+    }
+    ```

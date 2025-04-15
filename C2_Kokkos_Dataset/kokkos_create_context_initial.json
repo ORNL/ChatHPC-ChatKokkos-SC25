@@ -1,0 +1,92 @@
+[
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i] + y[i];\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i) + y(i);\n});"
+  },
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for reduction(+:sum)\nfor (i = 0, i < n, i++) {\n  sum += x[i] * y[i];\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * y(i);\n}, Kokkos::Sum<float>(sum));"
+  },
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for private(i, j, sum)\nfor (i = 0; i < n; ++i) {\n  sum = 0.0;\n  for (j = 0; j < n; ++j) {\n    sum += A[i][j] * x[j];\n  }\n  y[i] = sum;\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"sgemv\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float sum = 0.0f;\n  for (int j = 0; j < n; j++) {\n    sum += A(i,j) * x(j);\n  }\n  y(i) = sum;\n});"
+  },
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for private(i, j, l, sum)\nfor (i = 0; i < m; ++i) {\n  for (j = 0; j < n; ++j) {\n    sum = 0.0;\n    for (int l = 0; l < k; l++) {\n      sum += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * sum + beta * c[i * ldc + j];\n  }\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = alpha * sum + beta * c(i, j);\n });"
+  },
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, nnz, val, row, col, x, y) private(i, j)\nfor (i = 0; i < n; i++) {\n  y[i] = 0.0;\n  for (j = row[i]; j < row[i + 1]; j++) {\n    y[i] += val[j] * x[col[j]];\n  }\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row(i); j < row(i + 1); ++j) {\n    y(i) += val(j) * x(col(j));\n  }\n});"
+  },
+  {
+    "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, u, u_new) private(i)\nfor (i = 1; i < n-1; i++) {\n  u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[1];\n}",
+    "context": "OpenMP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i) {\n  u_new(i) = 0.5 * (u[i-1] + u[i+1]) - u[i]\n});"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?\n__global__ void saxpy (int n, float a, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = a * x[i] + y[i];\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i) + y(i);\n});"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?\n__global__ void sdot(int n, float *x, float *y, float *sum) {\n  int i = threadIdx.x + blockIdx.x * blockDim.x;\n  float update = 0.0;\n  if (i < n) {\n    update = x[i] * y[i];\n  }\n  atomicAdd(sum, update);\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * y(i);\n}, Kokkos::Sum<float>(sum));"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?\n__global__ void sgemv(int n, const float* A, const float* x, float* y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    float sum = 0.0f;\n    for (int j = 0; j < n; ++j) {\n      sum += A[i * n + j] * x[j];\n    }\n    y[i] = sum;\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"sgemv\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float sum = 0.0f;\n  for (int j = 0; j < n; j++) {\n    sum += A(i,j) * x(j);\n  }\n  y(i) = sum;\n});"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?__global__ void sgemm(int m, int n, int k, double alpha, const double *a, int lda, const double *b, int ldb, double beta, double *c, int ldc) {\n  int i = blockIdx.y * blockDim.y + threadIdx.y;\n  int j = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < m && j < n) {\n    double temp = 0.0;\n    for (int l = 0; l < k; ++l) {      temp += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * temp + beta * c[i * ldc + j];\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = alpha * sum + beta * c(i, j);\n });"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?\n__global__ void spmv(int n, int nnz, const float *val, const int *row, const int *col, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    for (int j = row[i]; j < row[i + 1]; ++j) {\n      y[i] += val[j] * x[col[j]];\n    }\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row(i); j < row(i + 1); ++j) {\n    y(i) += val(j) * x(col(j));\n  }\n});"
+  },
+  {
+    "question": "Can you translate this HIP code to Kokkos?\n__global__ void stencil (int n, const float *u, float *u_new) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i > 0 && i < n - 1) {\n    u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[i];\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i) {\n  u_new(i) = 0.5 * (u[i-1] + u[i+1]) - u[i]\n});"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i] + y[i];\n}",
+    "context": "Sequential to Kokkos parallelization",
+    "answer": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i) + y(i);\n});"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  sum += x[i] * y[i];\n}",
+    "context": "Sequential to Kokkos parallelization",
+    "answer": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * y(i);\n}, Kokkos::Sum<float>(sum));"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0; i < n; ++i) {\n  sum = 0.0;\n  for (j = 0; j < n; ++j) {\n    sum += A[i][j] * x[j];\n  }\n  y[i] = sum;\n}",
+    "context": "Sequential to Kokkos parallelization",
+    "answer": "Kokkos::parallel_for(\"sgemv\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float sum = 0.0f;\n  for (int j = 0; j < n; j++) {\n    sum += A(i,j) * x(j);\n  }\n  y(i) = sum;\n});"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0; i < m; ++i) {\n  for (j = 0; j < n; ++j) {\n    sum = 0.0;\n    for (int l = 0; l < k; l++) {\n      sum += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * sum + beta * c[i * ldc + j];\n  }\n}",
+    "context": "Sequential to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = alpha * sum + beta * c(i, j);\n });"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0; i < n; i++) {\n  y[i] = 0.0;\n  for (j = row[i]; j < row[i + 1]; j++) {\n    y[i] += val[j] * x[col[j]];\n  }\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row(i); j < row(i + 1); ++j) {\n    y(i) += val(j) * x(col(j));\n  }\n});"
+  },
+  {
+    "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 1; i < n-1; i++) {\n  u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[1];\n}",
+    "context": "HIP to Kokkos translation",
+    "answer": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i) {\n  u_new(i) = 0.5 * (u[i-1] + u[i+1]) - u[i]\n});"
+  }
+]

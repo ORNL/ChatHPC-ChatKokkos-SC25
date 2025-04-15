@@ -1,0 +1,23 @@
+- prompt: 'Line one
+
+    Line two'
+  response: 'First
+
+    Second
+
+    Third'
+  context: Single line
+- prompt: "Vectorize the following code snippet using SIMD instructions.\n\nOriginal\
+    \ Code:\n```c\nfor(int i=0; i< M; i++)\n{\n    for(int j=0; j< N; j++)\n    {\n\
+    \        C[i*N + j] = A[i] * B[j];\n    }\n}\n```"
+  context: 'Vector ISA: AVX2'
+  response: "Analysis:\n- The loop body is \"C[i*N + j] = A[i] * B[j];\".\n- The same\
+    \ value of A is used across all iterations of the inner loop.\n- So the elements\
+    \ of A can be broadcasted, outside the inner loop.\n- The inner loop can be vectorized\
+    \ by loading 8 elements from B, multiplying with the broadcasted A, then storing\
+    \ in C.\n- The loop is then incremented by vector length.\n\nVectorized Code:\n\
+    ```c\nfor(int i=0; i< M; i++)\n{\n    //Broadcast A[i]\n    __m256 a = _mm256_broadcast_ss(&A[i]);\n\
+    \    for(int j=0; j< N; j+=8)\n    {\n        //Load 8 elements from B\n     \
+    \   __m256 b = _mm256_loadu_ps(&B[j]);\n        //Multiply with A[i]\n       \
+    \ __m256 c = _mm256_mul_ps(a, b);\n        //Store the result\n        _mm256_storeu_ps(&C[i*N\
+    \ + j], c);\n    }\n}\n```"

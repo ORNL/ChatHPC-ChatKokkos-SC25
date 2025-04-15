@@ -1,0 +1,36 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# All (Defaults)
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Makefile
+[Makefile]
+indent_style = tab
+
+# Markdown
+[*.md]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
+
+# YAML
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# TXT
+[*.txt]
+trim_trailing_whitespace = false
+insert_final_newline = false

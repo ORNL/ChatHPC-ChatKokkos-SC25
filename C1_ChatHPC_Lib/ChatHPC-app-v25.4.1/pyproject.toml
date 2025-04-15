@@ -1,0 +1,165 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chathpc-app"
+dynamic = ["version"]
+description = "Base ChatHPC Application"
+readme = "README.md"
+requires-python = ">=3.9.0"
+keywords = []
+authors = [
+  { name = "Aaron Young", email = "youngar@ornl.gov" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "codellama @ git+ssh://git@github.com/meta-llama/codellama.git@main",
+  "peft==0.14.0",
+  "transformers==4.48.0",
+  "accelerate==1.2.1",
+  "datasets",
+  "bitsandbytes",
+  "protobuf",
+  "ipykernel",
+  "ipython",
+  "ipywidgets",
+  "jupyter",
+  "nbdime",
+  "wandb",
+  "pydantic-settings",
+  "tabulate",
+  "ollama",
+  "openai",
+  "gnureadline",
+  "loguru",
+  "jinja2",
+  "json_tricks",
+  "pyyaml",
+  "pytest",
+  "pytest-depends",
+  "option",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.urls]
+Documentation = "https://code.ornl.gov/ChatHPC/ChatHPC-app#readme"
+Homepage = "https://code.ornl.gov/ChatHPC/ChatHPC-app"
+Issues = "https://code.ornl.gov/ChatHPC/ChatHPC-app/-/issues"
+Source = "https://code.ornl.gov/ChatHPC/ChatHPC-app"
+
+[project.scripts]
+ChatHPC = "chathpc.app.__main__:cli"
+chathpc = "chathpc.app.__main__:cli"
+chathpc-json-to-md = "chathpc.app.json_to_markdown:cli"
+chathpc-data-to-md = "chathpc.app.json_to_markdown:cli"
+chathpc-json-to-yaml = "chathpc.app.json_to_yaml:cli"
+
+[tool.hatch.version]
+path = "src/chathpc/app/__about__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/chathpc"]
+
+[tool.hatch.env]
+requires = [
+  "hatch-mkdocs",
+]
+
+[tool.hatch.env.collectors.mkdocs.docs]
+path = "mkdocs.yml"
+
+[tool.hatch.envs.docs]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+  "pre-commit",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+  "coverage xml -o coverage.xml",
+]
+cov-html = [
+  "test-cov",
+  "cov-report",
+  "coverage html",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/chathpc/app tests}"
+
+[tool.coverage.run]
+source_pkgs = ["chathpc.app", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/chathpc/app/__about__.py",
+]
+
+[tool.coverage.paths]
+chathpc_app = ["src/chathpc/app", "*/chathpc-app/src/chathpc/app"]
+tests = ["tests", "*/chathpc-app/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "raise AssertionError",
+  "raise RuntimeError",
+  "raise NotImplementedError",
+  "pass",
+  "raise ValueError",
+]
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.hatch.envs.hatch-static-analysis]
+dependencies = ["ruff==0.6.4"]
+config-path = "ruff_defaults.toml"
+
+[tool.ruff]
+extend = "ruff_defaults.toml"
+
+[tool.ruff.lint]
+extend-ignore = [
+  "T201",   # `print` found
+  "FBT001", # Boolean-typed positional argument in function definition
+  "FBT002", # Boolean default positional argument in function definition
+  "EM101",  # Raw string in Exception
+  "TRY003", # Avoid long strings in Exception Class.
+]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

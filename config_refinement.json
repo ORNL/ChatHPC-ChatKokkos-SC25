@@ -1,0 +1,11 @@
+{
+    "data_file": "C2_Kokkos_Dataset/kokkos_create_context_refinement.json",
+    "base_model_path": "basemodels/CodeLlama-7b-hf",
+    "training_output_dir": "output/0_ChatKokko_refinement_training_checkpoints",
+    "finetuned_model_path": "output/1_ChatKokko_refinement_peft_adapter",
+    "merged_model_path": "output/2_ChatKokko_refinement_merged_adapters",
+    "max_response_tokens": 600,
+    "max_training_tokens": 600,
+    "prompt_history_file": "~/.chathpc_history",
+    "prompt_template_file": "prompt_template.txt"
+}

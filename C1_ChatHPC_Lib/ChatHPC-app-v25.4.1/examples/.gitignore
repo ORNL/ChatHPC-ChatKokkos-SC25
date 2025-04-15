@@ -1,0 +1,15 @@
+*_output.html
+*_output.ipynb
+*_output.txt
+*_out.json
+out*.txt
+verify_training.txt
+requirements-lock.txt
+/jupyter_app/
+/app/
+/app_old/
+/wandb/
+/kokkos-code-llama/
+/merged_adapters/
+/peft_adapter/
+/tokenizer/
