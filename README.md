@@ -1,5 +1,7 @@
 # ChatHPC: ChatKokkos SC25 Artifacts
 
+[![DOI](https://zenodo.org/badge/967029187.svg)](https://doi.org/10.5281/zenodo.15226006)
+
 This repository holds the artifacts for the ChatHPC SC'25 submission. Contained in this repo is the ChatHPC Library and corresponding CLI application and the Kokkos training and verification datasets used to train and validate ChatKokkos.
 
 See [ChatHPC App README](C1_ChatHPC_Lib/ChatHPC-app-v25.4.1/README.md) for more details on how to use the ChatHPC Library CLI Application.
