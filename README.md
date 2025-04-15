@@ -10,7 +10,7 @@ See [ChatHPC App README](C1_ChatHPC_Lib/ChatHPC-app-v25.4.1/README.md) for more 
 
 ### Software
 
-This repository's scripts depend on [uv](https://docs.astral.sh/uv/) to build the python virtual environment to run the software with all the correct dependencies installed. A full list of the dependencies can be found in the `C1_ChatHPC_Lib/ChatHPC-app-v25.4.1/pyproject.toml` file. Please install uv, using the standard instructions, [installing uv](https://docs.astral.sh/uv/getting-started/installation/). This repostory was developed on an Ubuntu 22.04.5 LTS system and should work on any modern linux system.
+This repository's scripts depend on [uv](https://docs.astral.sh/uv/) to build the python virtual environment and to run the software with all the correct dependencies installed. A full list of the dependencies can be found in the `C1_ChatHPC_Lib/ChatHPC-app-v25.4.1/pyproject.toml` file. Please install uv, using the standard instructions, [installing uv](https://docs.astral.sh/uv/getting-started/installation/). This repostory was developed on an Ubuntu 22.04.5 LTS system and should work on any modern Linux system.
 
 ### Hardware
 
