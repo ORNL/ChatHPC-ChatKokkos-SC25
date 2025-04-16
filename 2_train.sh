@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-GIT_ROOT=$(git rev-parse --show-toplevel)
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 echo '*** Running 2_train.sh ***'
