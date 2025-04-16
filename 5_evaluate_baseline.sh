@@ -19,7 +19,7 @@ echo
 echo '*** Evaluate OpenAI gpt-4o base model ***'
 if [ -z "$OPENAI_API_KEY" ]; then
     echo "Error: OPENAI_API_KEY is not set."
-    echo "Please export your key if you would like to evauate the OpenAI gpt-4o base model."
+    echo "Please export your key if you would like to evaluate the OpenAI gpt-4o base model."
     echo "export OPENAI_API_KEY=your-key-here"
     exit 1
 else

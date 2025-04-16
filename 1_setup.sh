@@ -34,4 +34,11 @@ else
     echo
     echo git clone git@hf.co:meta-llama/CodeLlama-7b-hf basemodels/CodeLlama-7b-hf
     git clone 'git@hf.co:meta-llama/CodeLlama-7b-hf' 'basemodels/CodeLlama-7b-hf'
+    if [ -d "basemodels/CodeLlama-7b-hf" ]; then
+        echo "CodeLlama-7b-hf base model found"
+    else
+        echo "Error: Unable to automatically download CodeLlama-7b-hf base model."
+        echo "Please correct errors or manually download and place in basemodels directory."
+        exit 1
+    fi
 fi
