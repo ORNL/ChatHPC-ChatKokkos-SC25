@@ -1,0 +1,317 @@
+[
+    {
+        "index": 0,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i] + y[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i] + y[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i) + y(i);\n});"
+    },
+    {
+        "index": 1,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop reduction(+:sum)\nfor (i = 0, i < n, i++) {\n  sum += x[i] * y[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop reduction(+:sum)\nfor (i = 0, i < n, i++) {\n  sum += x[i] * y[i];\n}\n",
+        "response": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * y(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 2,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop private(i, j, sum)\nfor (i = 0; i < n; ++i) {\n  sum = 0.0;\n  for (j = 0; j < n; ++j) {\n    sum += A[i][j] * x[j];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop private(i, j, sum)\nfor (i = 0; i < n; ++i) {\n  sum = 0.0;\n  for (j = 0; j < n; ++j) {\n    sum += A[i][j] * x[j];\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemv\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float sum = 0.0f;\n  for (int j = 0; j < n; j++) {\n    sum += A(i,j) * x(j);\n  }\n  y(i) = sum;\n});"
+    },
+    {
+        "index": 3,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop collapse(2) private(i, j, l, sum)\nfor (i = 0; i < m; ++i) {\n  for (j = 0; j < n; ++j) {\n    sum = 0.0;\n    for (int l = 0; l < k; l++) {\n      sum += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * sum + beta * c[i * ldc + j];\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop collapse(2) private(i, j, l, sum)\nfor (i = 0; i < m; ++i) {\n  for (j = 0; j < n; ++j) {\n    sum = 0.0;\n    for (int l = 0; l < k; l++) {\n      sum += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * sum + beta * c[i * ldc + j];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = alpha * sum + beta * c(i, j);\n });"
+    },
+    {
+        "index": 4,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop shared(n, nnz, val, row, col, x, y) private(i, j)\nfor (i = 0; i < n; i++) {\n  y[i] = 0.0;\n  for (j = row[i]; j < row[i + 1]; j++) {\n    y[i] += val[j] * x[col[j]];\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop shared(n, nnz, val, row, col, x, y) private(i, j)\nfor (i = 0; i < n; i++) {\n  y[i] = 0.0;\n  for (j = row[i]; j < row[i + 1]; j++) {\n    y[i] += val[j] * x[col[j]];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row(i); j < row(i + 1); ++j) {\n    y(i) += val(j) * x(col(j));\n  }\n});"
+    },
+    {
+        "index": 5,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop shared(n, u, u_new) private(i)\nfor (i = 1; i < n-1; i++) {\n  u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenACC code to Kokkos?\n#pragma acc parallel loop shared(n, u, u_new) private(i)\nfor (i = 1; i < n-1; i++) {\n  u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i) {\n  u_new(i) = 0.5 * (u[i-1] + u[i+1]) - u[i]\n});"
+    },
+    {
+        "index": 6,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos? \n#pragma omp parallel for shared(n, x, y) private(i)\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos? \n#pragma omp parallel for shared(n, x, y) private(i)\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"scale\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i);\n});"
+    },
+    {
+        "index": 7,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x, y) private(i, a)\nfor (i = 0, i < n, i++) {\n  a = x[i];\n  x[i] = y[i];\n  y[i] = a;\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x, y) private(i, a)\nfor (i = 0, i < n, i++) {\n  a = x[i];\n  x[i] = y[i];\n  y[i] = a;\n}\n",
+        "response": "Kokkos::parallel_for(\"swap\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float tmp = x(i);\n  y(i) = x(i);\n  x(i) = y(i);\n});"
+    },
+    {
+        "index": 8,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x) private(i, sum)\nfor (i = 0, i < n, i++) {\n  sum += x[i] * x[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x) private(i, sum)\nfor (i = 0, i < n, i++) {\n  sum += x[i] * x[i];\n}\n",
+        "response": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * x(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 9,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x, y) private(i) \nfor (i = 0, i < n, i++) {\n  y[i] = x[i];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x, y) private(i) \nfor (i = 0, i < n, i++) {\n  y[i] = x[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"scale\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = alpha * x(i);\n});"
+    },
+    {
+        "index": 10,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x) private(i, sum)\nfor (i = 0, i < n, i++) {\n  sum += abs(x[i]);\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for shared(n, x) private(i, sum)\nfor (i = 0, i < n, i++) {\n  sum += abs(x[i]);\n}\n",
+        "response": "Kokkos::parallel_reduce(\"reduction\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = std::abs(x(i));\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 11,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for \nfor (int col = 0; col < num_cols; ++col) {\n  for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n    y[row_ind[i]] += values[i] * x[col];\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for \nfor (int col = 0; col < num_cols; ++col) {\n  for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n    y[row_ind[i]] += values[i] * x[col];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, num_cols), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = col_ptr(i); j < col_ptr(i + 1); ++j) {\n    y(row_ind(j)) += values(j) * x(i);\n  }\n});"
+    },
+    {
+        "index": 12,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (int i = 0; i < non_zeros; i++) {\n  y[row_ind[i]] += values[i] * x[col_ind[i]];\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (int i = 0; i < non_zeros; i++) {\n  y[row_ind[i]] += values[i] * x[col_ind[i]];\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row_ind(i); j < row_ind(i + 1); ++j) {\n    y(i) += values(j) * x(col_ind(j));\n  }\n});"
+    },
+    {
+        "index": 13,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for  \nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    u_new[i][j] = (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j]) * 0.25;\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for  \nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    u_new[i][j] = (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j]) * 0.25;\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i, int j) {\n  u_new(i,j) = 0.25 * (u(i-1,j) + u(i,j+1) + u(i,j-1) + u(i+1,j) + f(i,j));\n});"
+    },
+    {
+        "index": 14,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    for (k = 1; k < n-1; k++) {\n      u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    for (k = 1; k < n-1; k++) {\n      u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i, const int j) {\n  u_new(i,j) = 0.125 * (u(i-1,j) + u(i,j+1) + u(i,j-1) + u(i+1,j) + u(i,j,k-1) + u(i,j,k+1) + f(i,j,k) * dx * dy);\n});"
+    },
+    {
+        "index": 15,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for \nfor (i = 0; i < SIZE; ++i) {\n  for (j = 0; j < SIZE; ++j) {\n    conv = 0.0;\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj) {\n        if (i + fi < SIZE && j + fj < SIZE){\n          conv += filter[fi][fj] * input[i + fi][j + fj];\n        }\n      }\n    }\n    ouput[i, j] = conv;\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for \nfor (i = 0; i < SIZE; ++i) {\n  for (j = 0; j < SIZE; ++j) {\n    conv = 0.0;\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj) {\n        if (i + fi < SIZE && j + fj < SIZE){\n          conv += filter[fi][fj] * input[i + fi][j + fj];\n        }\n      }\n    }\n    ouput[i, j] = conv;\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"conv2d\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  for (int j = 0; j < n; j++) {\n    float sum = 0.0f;\n    for (int fi = 0; fi < fSize; fi++) {\n      for (int fj = 0; fj < fSize; fj++) {\n        if (i + fi >= 0 && i + fi < n && j + fj >= 0 && j + fj < n) {\n          sum += filter(fi, fj) * input(i + fi, j + fj);\n        }\n      }\n    }\n    output(i, j) = sum;\n  }\n});"
+    },
+    {
+        "index": 16,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nOpenMP to Kokkos translation\n\n\n### Question:\nCan you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (i = 0; i < SIZE; i+=FILTER_SIZE) {\n  for (j = 0; j < SIZE; j+=FILTER_SIZE) {\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj){\n        image[i][j] *= filter[fi][fj];\n      }\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "OpenMP to Kokkos translation\n",
+        "question": "Can you translate this OpenMP code to Kokkos?\n#pragma omp parallel for\nfor (i = 0; i < SIZE; i+=FILTER_SIZE) {\n  for (j = 0; j < SIZE; j+=FILTER_SIZE) {\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj){\n        image[i][j] *= filter[fi][fj];\n      }\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += A(i,l) * B(l,j);\n  }\n  C(i, j) = sum;\n});"
+    },
+    {
+        "index": 17,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void saxpy (int n, float a, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = a * x[i] + y[i];\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void saxpy (int n, float a, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = a * x[i] + y[i];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i) + y(i);\n});"
+    },
+    {
+        "index": 18,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void sdot(int n, float *x, float *y, float *sum) {\n  int i = threadIdx.x + blockIdx.x * blockDim.x;\n  float update = 0.0;\n  if (i < n) {\n    update = x[i] * y[i];\n  }\n  atomicAdd(sum, update);\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void sdot(int n, float *x, float *y, float *sum) {\n  int i = threadIdx.x + blockIdx.x * blockDim.x;\n  float update = 0.0;\n  if (i < n) {\n    update = x[i] * y[i];\n  }\n  atomicAdd(sum, update);\n}\n",
+        "response": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * y(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 19,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void sgemv(int n, const float* A, const float* x, float* y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    float sum = 0.0f;\n    for (int j = 0; j < n; ++j) {\n      sum += A[i * n + j] * x[j];\n    }\n    y[i] = sum;\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void sgemv(int n, const float* A, const float* x, float* y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    float sum = 0.0f;\n    for (int j = 0; j < n; ++j) {\n      sum += A[i * n + j] * x[j];\n    }\n    y[i] = sum;\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemv\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float sum = 0.0f;\n  for (int j = 0; j < n; j++) {\n    sum += A(i,j) * x(j);\n  }\n  y(i) = sum;\n});"
+    },
+    {
+        "index": 20,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void sgemm(int m, int n, int k, double alpha, const double *a, int lda, const double *b, int ldb, double beta, double *c, int ldc) {\n  int i = blockIdx.y * blockDim.y + threadIdx.y;\n  int j = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < m && j < n) {\n    double temp = 0.0;\n    for (int l = 0; l < k; ++l) {\n      temp += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * temp + beta * c[i * ldc + j];\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void sgemm(int m, int n, int k, double alpha, const double *a, int lda, const double *b, int ldb, double beta, double *c, int ldc) {\n  int i = blockIdx.y * blockDim.y + threadIdx.y;\n  int j = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < m && j < n) {\n    double temp = 0.0;\n    for (int l = 0; l < k; ++l) {\n      temp += a[i * lda + l] * b[l * ldb + j];\n    }\n    c[i * ldc + j] = alpha * temp + beta * c[i * ldc + j];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = alpha * sum + beta * c(i, j);\n });"
+    },
+    {
+        "index": 21,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void spmv(int n, int nnz, const float *val, const int *row, const int *col, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    for (int j = row[i]; j < row[i + 1]; ++j) {\n      y[i] += val[j] * x[col[j]];\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void spmv(int n, int nnz, const float *val, const int *row, const int *col, const float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    for (int j = row[i]; j < row[i + 1]; ++j) {\n      y[i] += val[j] * x[col[j]];\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row(i); j < row(i + 1); ++j) {\n    y(i) += val(j) * x(col(j));\n  }\n});"
+    },
+    {
+        "index": 22,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this CUDA code to Kokkos?\n__global__ void stencil (int n, const float *u, float *u_new) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i > 0 && i < n - 1) {\n    u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[i];\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this CUDA code to Kokkos?\n__global__ void stencil (int n, const float *u, float *u_new) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i > 0 && i < n - 1) {\n    u_new[i] = 0.5 * (u[i-1] + u[i+1]) - u[i];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i) {\n  u_new(i) = 0.5 * (u[i-1] + u[i+1]) - u[i]\n});"
+    },
+    {
+        "index": 23,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void scal (int n, float a, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = a * x[i];  \n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void scal (int n, float a, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = a * x[i];  \n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"scal\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i);\n});"
+    },
+    {
+        "index": 24,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void swap (int n, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    a = x[i];\n    x[i] = y[i];\n    y[i] = a;\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void swap (int n, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    a = x[i];\n    x[i] = y[i];\n    y[i] = a;\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"swap\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  float tmp = x(i);\n  x(i) = y(i);\n  y(i) = tmp;\n});"
+    },
+    {
+        "index": 25,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void nrm2 (int n, float *x, float *y, float *sum) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  float update = 0.0;\n  if (i < n ) {\n    update = x[i] * x[i];\n  }\n  atomicAdd(sum, update);\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void nrm2 (int n, float *x, float *y, float *sum) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  float update = 0.0;\n  if (i < n ) {\n    update = x[i] * x[i];\n  }\n  atomicAdd(sum, update);\n}\n",
+        "response": "Kokkos::parallel_reduce(\"nrm2\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * x(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 26,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void copy (int n, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = x[i];\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void copy (int n, float *x, float *y) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < n) {\n    y[i] = x[i];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"copy\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = x(i);\n});"
+    },
+    {
+        "index": 27,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void asum (int n, float *x, float *sum) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  float update = 0.0;\n  if (i < n) {\n    update = abs(x[i]);\n  }\n  atomicAdd(sum, update);\n} \n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void asum (int n, float *x, float *sum) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  float update = 0.0;\n  if (i < n) {\n    update = abs(x[i]);\n  }\n  atomicAdd(sum, update);\n} \n",
+        "response": "Kokkos::parallel_reduce(\"asum\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) > 0.0 ? x(i) : -x(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 28,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void spmv_csc (int num_cols, int* col_ptr, int* row_index, float *x, float *y, float *values) {\n  int col = blockIdx.x * blockDim.x + threadIdx.x;\n  if (col < num_cols) {\n    for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n      y[row_ind[i]] += values[i] * x[col];\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void spmv_csc (int num_cols, int* col_ptr, int* row_index, float *x, float *y, float *values) {\n  int col = blockIdx.x * blockDim.x + threadIdx.x;\n  if (col < num_cols) {\n    for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n      y[row_ind[i]] += values[i] * x[col];\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv_csc\", range_policy(0, num_cols), KOKKOS_LAMBDA(const int i) {\n  y(row_index(i)) += values(i) * x(col);\n});"
+    },
+    {
+        "index": 29,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void spmv_coo (int numzeros, int* col_ind, int* row_ind, float *x, float *y, float *values) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < nonzeros){\n    y[row_ind[i]] += values[i] * x[col_ind[i]];\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void spmv_coo (int numzeros, int* col_ind, int* row_ind, float *x, float *y, float *values) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  if (i < nonzeros){\n    y[row_ind[i]] += values[i] * x[col_ind[i]];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv_coo\", range_policy(0, nonzeros), KOKKOS_LAMBDA(const int i) {\n  y(row_ind(i)) += values(i) * x(col_ind(i))\n});"
+    },
+    {
+        "index": 30,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void stencil_2d (int n, float dx, float dy, float *u, float *u_new, float *f) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  if ( i > 0 && i < n-1 && j > 0 && j < n-1){\n    u_new [i][j] = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void stencil_2d (int n, float dx, float dy, float *u, float *u_new, float *f) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  if ( i > 0 && i < n-1 && j > 0 && j < n-1){\n    u_new [i][j] = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i, const int j) {\n  u_new(i,j) = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n});"
+    },
+    {
+        "index": 31,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void stencil_3d (int n, float dx, float dy, float dz, float *u, float *u_new, float *f) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  int k = blockIdx.z * blockDim.z + threadIdx.z;\n  if ( i > 0 && i < n-1 && j > 0 && j < n-1 && k > 0 && k < n - 1){\n    u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void stencil_3d (int n, float dx, float dy, float dz, float *u, float *u_new, float *f) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  int k = blockIdx.z * blockDim.z + threadIdx.z;\n  if ( i > 0 && i < n-1 && j > 0 && j < n-1 && k > 0 && k < n - 1){\n    u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0, 0, 0}, {n-1, n-1, n-1}), KOKKOS_LAMBDA (const int i, const int j, const int k) {\n  u_new(i,j,k) = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n});"
+    },
+    {
+        "index": 32,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void conv (int SIZE, int FILTER_SIZE, float *filter, float *input, float *output) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  float conv = 0.0;\n  for (fi = 0; fi < FILTER_SIZE; ++fi) {\n    for (fj = 0; fj < FILTER_SIZE; ++fj) {\n      if (i + fi < SIZE && j + fj < SIZE){\n        conv += filter[fi][fj] * input[i + fi][j + fj];\n      }\n    }\n  }\n  ouput[i, j] = conv;\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void conv (int SIZE, int FILTER_SIZE, float *filter, float *input, float *output) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  float conv = 0.0;\n  for (fi = 0; fi < FILTER_SIZE; ++fi) {\n    for (fj = 0; fj < FILTER_SIZE; ++fj) {\n      if (i + fi < SIZE && j + fj < SIZE){\n        conv += filter[fi][fj] * input[i + fi][j + fj];\n      }\n    }\n  }\n  ouput[i, j] = conv;\n}\n",
+        "response": "Kokkos::parallel_for(\"conv\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, n}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int fi = 0; fi < fSize; fi++) {\n    for (int fj = 0; fj < fSize; fj++) {\n      if (i + fi >= 0 && i + fi < n && j + fj >= 0 && j + fj < n) {\n        sum += filter(fi, fj) * input(i + fi, j + fj);\n      }\n    }\n  }\n  output(i, j) = sum;\n});"
+    },
+    {
+        "index": 33,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nHIP to Kokkos translation\n\n\n### Question:\nCan you translate this HIP code to Kokkos?\n__global__ void spectral (int SIZE, int FILTER_SIZE, float *filter, float *input, float *output) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  for (fi = 0; fi < FILTER_SIZE; ++fi) {\n    for (fj = 0; fj < FILTER_SIZE; ++fj) {\n      if (i + fi < SIZE && j + fj < SIZE){\n        image[i + fi][j + fj] *= filter[fi][fj];\n      }\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "HIP to Kokkos translation\n",
+        "question": "Can you translate this HIP code to Kokkos?\n__global__ void spectral (int SIZE, int FILTER_SIZE, float *filter, float *input, float *output) {\n  int i = blockIdx.x * blockDim.x + threadIdx.x;\n  int j = blockIdx.y * blockDim.y + threadIdx.y;\n  for (fi = 0; fi < FILTER_SIZE; ++fi) {\n    for (fj = 0; fj < FILTER_SIZE; ++fj) {\n      if (i + fi < SIZE && j + fj < SIZE){\n        image[i + fi][j + fj] *= filter[fi][fj];\n      }\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spectral\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, n}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int fi = 0; fi < filter_size; fi++) {\n    for (int fj = 0; fj < filter_size; fj++) {\n      if (i + fi >= 0 && i + fi < n && j + fj >= 0 && j + fj < n) {\n        sum += input(i + fi, j + fj) * filter(fi, fj);\n      }\n    }\n  }\n  output(i, j) = sum;\n});"
+    },
+    {
+        "index": 34,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i];\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  y[i] = a * x[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"saxpy\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = a * x(i);\n});"
+    },
+    {
+        "index": 35,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  a = x[i];\n  x[i] = y[i];\n  y[i] = a;\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  a = x[i];\n  x[i] = y[i];\n  y[i] = a;\n}\n",
+        "response": "Kokkos::parallel_for(\"swap\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  float tmp = x(i);\n  x(i) = y(i);\n  y(i) = tmp;\n});"
+    },
+    {
+        "index": 36,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  sum += x[i] * x[i];\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  sum += x[i] * x[i];\n}\n",
+        "response": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * x(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 37,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  y[i] = x[i];\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  y[i] = x[i];\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = x(i);\n});"
+    },
+    {
+        "index": 38,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  sum += abs(x[i]);\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0, i < n, i++) {\n  sum += abs(x[i]);\n}\n",
+        "response": "Kokkos::parallel_reduce(\"sdot\", Kokkos::RangePolicy<>(0, n), KOKKOS_LAMBDA(const int i, float &update) {\n  update = x(i) * x(i);\n}, Kokkos::Sum<float>(sum));"
+    },
+    {
+        "index": 39,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (int col = 0; col < num_cols; ++col) {\n  for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n    y[row_ind[i]] += values[i] * x[col];\n  }\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (int col = 0; col < num_cols; ++col) {\n  for (int i = col_ptr[col]; i < col_ptr[col + 1]; ++i) {\n    y[row_ind[i]] += values[i] * x[col];\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, num_rows), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row_ind(i); j < row_ind(i + 1); ++j) {\n    y(i) += values(j) * x(col(j));\n  }\n});"
+    },
+    {
+        "index": 40,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (int i = 0; i < nonzeros; i++) {\n  y[row_ind [i]] += values[i] * x[col_ind [i]];\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (int i = 0; i < nonzeros; i++) {\n  y[row_ind [i]] += values[i] * x[col_ind [i]];\n}\n",
+        "response": "Kokkos::parallel_for(\"spmv\", range_policy(0, n), KOKKOS_LAMBDA(const int i) {\n  y(i) = 0.0;\n  for (int j = row_ind(i); j < row_ind(i + 1); ++j) {\n    y(i) += values(j) * x(col_ind(j));\n  }\n});"
+    },
+    {
+        "index": 41,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    u_new [i][j] = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n  }\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    u_new [i][j] = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i, int j) {\n  u_new(i,j) = 0.25 * (u[i-1][j] + u[i][j+1] + u[i][j-1] + u[i+1][j] + f[i][j] * dx * dy);\n});"
+    },
+    {
+        "index": 42,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    for (k = 1; k < n-1; k++) {\n      u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 1; i < n-1; i++) {\n  for (j = 1; j < n-1; j++) {\n    for (k = 1; k < n-1; k++) {\n      u_new [i][j][k] = 0.125 * (u[i-1][j][k] + u[i][j+1][k] + u[i][j-1][k] + u[i+1][j][k] + u[i][j][k-1] + u[i][j][k+1] + f[i][j][k] * dx * dy * dz);\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"stencil\", range_policy(1, n-1), KOKKOS_LAMBDA(const int i, const int j) {\n  u_new(i,j) = 0.125 * (u(i-1,j) + u(i,j+1) + u(i,j-1) + u(i+1,j) + u(i,j,k-1) + u(i,j,k+1) + f(i,j,k) * dx * dy);\n});"
+    },
+    {
+        "index": 43,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0; i < SIZE; ++i) {\n  for (j = 0; j < SIZE; ++j) {\n    conv = 0.0;\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj) {\n        if (i + fi < SIZE && j + fj < SIZE){\n          conv += filter[fi][fj] * input[i + fi][j + fj];\n        }\n      }\n    }\n    ouput[i, j] = conv;\n  }\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0; i < SIZE; ++i) {\n  for (j = 0; j < SIZE; ++j) {\n    conv = 0.0;\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj) {\n        if (i + fi < SIZE && j + fj < SIZE){\n          conv += filter[fi][fj] * input[i + fi][j + fj];\n        }\n      }\n    }\n    ouput[i, j] = conv;\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"conv2d\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, n}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int fi = 0; fi < fH; fi++) {\n    for (int fj = 0; fj < fW; fj++) {\n      if (i + fi >= 0 && i + fi < inH && j + fj >= 0 && j + fj < inW) {\n        sum += input(i + fi, j + fj) * filter(fi, fj);\n      }\n    }\n  }\n  output(i, j) = sum;\n});"
+    },
+    {
+        "index": 44,
+        "prompt": "You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.\n\nYou must output the answer the question.\n\n### Context:\nSequential to Kokkos parallelization\n\n\n### Question:\nCan you parallelize this sequential code using Kokkos?\nfor (i = 0; i < SIZE; i+=FILTER_SIZE) {\n  for (j = 0; j < SIZE; j+=FILTER_SIZE) {\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj){\n        image[i][j] *= filter[fi][fj];\n      }\n    }\n  }\n}\n\n\n### Answer:\n",
+        "context": "Sequential to Kokkos parallelization\n",
+        "question": "Can you parallelize this sequential code using Kokkos?\nfor (i = 0; i < SIZE; i+=FILTER_SIZE) {\n  for (j = 0; j < SIZE; j+=FILTER_SIZE) {\n    for (fi = 0; fi < FILTER_SIZE; ++fi) {\n      for (fj = 0; fj < FILTER_SIZE; ++fj){\n        image[i][j] *= filter[fi][fj];\n      }\n    }\n  }\n}\n",
+        "response": "Kokkos::parallel_for(\"sgemm\", Kokkos::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {n, m}), KOKKOS_LAMBDA (const int i, const int j) {\n  float sum = 0.0f;\n  for (int l = 0; l < k; l++) {\n    sum += a(i,l) * b(l,j);\n  }\n  c(i, j) = sum;\n});"
+    }
+]

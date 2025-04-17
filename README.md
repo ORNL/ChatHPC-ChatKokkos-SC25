@@ -68,3 +68,6 @@ ChatHPC-ChatKokkos-SC25
     - Alternatively, you can manually download the CodeLlama-7b-hf model from the hugging face website and place it in the basemodels directory at `basemodels/CodeLlama-7b-hf`
 2. Run `run_all.sh` which will call `1_setup.sh`, `2_train.sh`, `3_verify.sh`, `4_evaluate.sh`, and `5_evaluate_baseline.sh` in order.
 3. Review the created output artifacts from training and evaluating ChatKokkos. See [Output Artifacts](#output-artifacts).
+
+> [!NOTE]
+> Note: An example of the expected output is found in the `example_evaluation_output` folder. This folder contains the expected output stored in the `evaluation` folder after running the `run_all.sh` script. Additionally, the expected console output from the `run_all.sh` script is provided in the `example_evaluation_output/run_all_output.txt` file.

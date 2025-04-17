@@ -1,0 +1,331 @@
+*** Running run_all.sh ***
+
+Running 1_setup.sh
+*** Running 1_setup.sh ***
+
+*** Ensure commands are running in correct directory. ***
+cd ~/ChatHPC-ChatKokkos-SC25
+
+*** Check for UV ***
+uv is installed.
+
+*** Test running ChatHPC CLI command. ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc -h
+usage: chathpc [-h] [--debug] [--log_level LOG_LEVEL] [--config CONFIG]
+               [--extract] [--no-extract] [--data_file Path]
+               [--base_model_path Path] [--finetuned_model_path Path]
+               [--merged_model_path Path] [--training_output_dir Path]
+               [--max_training_tokens int] [--max_response_tokens int]
+               [--prompt_history_file Path]
+               [--prompt_template_file {Path,null}]
+               [--prompt_template {str,null}] [--use_wandb bool]
+               {config,train,run,run_base,run_fine,run_merged,verify,test,base,ollama,openai}
+               ...
+
+ChatHPC Application. Used to train and interact with ChatX applications which
+are part of ChatHPC.
+
+options:
+  -h, --help            show this help message and exit
+  --debug               Open debug port (5678).
+  --log_level LOG_LEVEL
+                        Log level.
+  --config CONFIG       Path to config json file.
+  --extract             Extract the answer from the response.
+  --no-extract          Show the response without extracting the answer.
+  --data_file Path      Path to the JSON file containing training data for
+                        model fine-tuning. (required)
+  --base_model_path Path
+                        Path to the pre-trained base LLM model directory.
+                        (default: /auto/projects/ChatHPC/models/cache/meta-
+                        llama/CodeLlama-7b-hf)
+  --finetuned_model_path Path
+                        Path where fine-tuned model layers will be saved.
+                        (default: peft_adapter)
+  --merged_model_path Path
+                        Path where the complete merged model will be saved.
+                        (default: merged_adapters)
+  --training_output_dir Path
+                        Path where training output will be saved. (default:
+                        training_checkpoints)
+  --max_training_tokens int
+                        Maximum number of tokens to use to tokenize the
+                        training sets. (default: 512)
+  --max_response_tokens int
+                        Maximum number of tokens to generate in model
+                        responses. (default: 600)
+  --prompt_history_file Path
+                        Path to the file containing interactive prompt
+                        history. (default: ~/.chathpc_history)
+  --prompt_template_file {Path,null}
+                        Path to the prompt template to use for training and
+                        inference. (default: null)
+  --prompt_template {str,null}
+                        Path to the prompt template to use for training and
+                        inference. (default: null)
+  --use_wandb bool      Whether to use Weights & Biases for logging. (default:
+                        False)
+
+subcommands:
+  valid subcommands
+
+  {config,train,run,run_base,run_fine,run_merged,verify,test,base,ollama,openai}
+    config              Print current config
+    train               Finetune the model
+    run                 Interact with the model
+    run_base            Interact with the base model
+    run_fine            Interact with the finetuned model
+    run_merged          Interact with the merged model
+    verify              Verify the trained model with the training dataset
+    test                Test the trained model with a testing dataset
+    base                base subcommands
+    ollama              Ollama subcommands
+    openai              OpenAI subcommands
+
+*** Check for base model weights... ***
+CodeLlama-7b-hf base model not found, trying to download from hugging face.
+Note: If this fails, please register your SSH key with Hugging Face, and request access to https://huggingface.co/meta-llama/CodeLlama-7b-hf.
+Alternatively, you can manually download the CodeLlama-7b-hf model from the hugging face website and place it in the basemodels directory.
+
+git clone git@hf.co:meta-llama/CodeLlama-7b-hf basemodels/CodeLlama-7b-hf
+
+Running 2_train.sh
+*** Running 2_train.sh ***
+
+*** Ensure commands are running in correct directory. ***
+cd ~/ChatHPC-ChatKokkos-SC25
+
+*** Training Chatkokkos Initial ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_initial.json train
+Setting               Value
+--------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+data_file             C2_Kokkos_Dataset/kokkos_create_context_initial.json
+base_model_path       basemodels/CodeLlama-7b-hf
+finetuned_model_path  output/1_ChatKokko_initial_peft_adapter
+merged_model_path     output/2_ChatKokko_initial_merged_adapters
+training_output_dir   output/0_ChatKokko_initial_training_checkpoints
+max_training_tokens   600
+max_response_tokens   600
+prompt_history_file   ~/.chathpc_history
+prompt_template_file  prompt_template.txt
+prompt_template       You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.
+
+                      You must output the answer the question.
+                      {% if context %}
+                      ### Context:
+                      {{ context }}
+                      {% endif %}
+                      ### Question:
+                      {{ prompt }}
+
+                      ### Answer:
+                      {{ response }}
+use_wandb             False
+filename              config_initial.json
+trainable params: 16,777,216 || all params: 6,755,323,904 || trainable%: 0.2484
+multiple gpus detected!
+compiling the model
+{'loss': 1.2514, 'grad_norm': 0.22021466493606567, 'learning_rate': 2.9999999999999997e-05, 'epoch': 10.0}
+{'loss': 1.1737, 'grad_norm': 0.249753937125206, 'learning_rate': 5.9999999999999995e-05, 'epoch': 20.0}
+{'eval_loss': 1.0890129804611206, 'eval_runtime': 0.4842, 'eval_samples_per_second': 37.176, 'eval_steps_per_second': 6.196, 'epoch': 20.0}
+{'loss': 0.9571, 'grad_norm': 0.2673150599002838, 'learning_rate': 8.999999999999999e-05, 'epoch': 30.0}
+{'loss': 0.5736, 'grad_norm': 0.3057972490787506, 'learning_rate': 0.00011999999999999999, 'epoch': 40.0}
+{'eval_loss': 0.32305940985679626, 'eval_runtime': 0.432, 'eval_samples_per_second': 41.664, 'eval_steps_per_second': 6.944, 'epoch': 40.0}
+{'loss': 0.1996, 'grad_norm': 0.13043060898780823, 'learning_rate': 0.00015, 'epoch': 50.0}
+{'loss': 0.0762, 'grad_norm': 0.12285483628511429, 'learning_rate': 0.00017999999999999998, 'epoch': 60.0}
+{'eval_loss': 0.051154956221580505, 'eval_runtime': 0.458, 'eval_samples_per_second': 39.298, 'eval_steps_per_second': 6.55, 'epoch': 60.0}
+{'loss': 0.0463, 'grad_norm': 0.07472790032625198, 'learning_rate': 0.00020999999999999998, 'epoch': 70.0}
+{'loss': 0.0373, 'grad_norm': 0.0534466877579689, 'learning_rate': 0.00023999999999999998, 'epoch': 80.0}
+{'eval_loss': 0.03463883325457573, 'eval_runtime': 0.4582, 'eval_samples_per_second': 39.282, 'eval_steps_per_second': 6.547, 'epoch': 80.0}
+{'loss': 0.0323, 'grad_norm': 0.03656172379851341, 'learning_rate': 0.00027, 'epoch': 90.0}
+{'loss': 0.028, 'grad_norm': 0.04422726854681969, 'learning_rate': 0.0003, 'epoch': 100.0}
+{'eval_loss': 0.02502243034541607, 'eval_runtime': 0.4615, 'eval_samples_per_second': 38.999, 'eval_steps_per_second': 6.5, 'epoch': 100.0}
+{'loss': 0.0207, 'grad_norm': 0.057129256427288055, 'learning_rate': 0.00029, 'epoch': 110.0}
+{'loss': 0.0117, 'grad_norm': 0.07053373008966446, 'learning_rate': 0.00028, 'epoch': 120.0}
+{'eval_loss': 0.011215920560061932, 'eval_runtime': 0.4592, 'eval_samples_per_second': 39.195, 'eval_steps_per_second': 6.533, 'epoch': 120.0}
+{'loss': 0.0108, 'grad_norm': 0.019216017797589302, 'learning_rate': 0.00027, 'epoch': 130.0}
+{'loss': 0.0104, 'grad_norm': 0.013629605062305927, 'learning_rate': 0.00026, 'epoch': 140.0}
+{'eval_loss': 0.010316790081560612, 'eval_runtime': 0.4559, 'eval_samples_per_second': 39.478, 'eval_steps_per_second': 6.58, 'epoch': 140.0}
+{'loss': 0.0103, 'grad_norm': 0.010079202242195606, 'learning_rate': 0.00025, 'epoch': 150.0}
+{'loss': 0.0103, 'grad_norm': 0.009664706885814667, 'learning_rate': 0.00023999999999999998, 'epoch': 160.0}
+{'eval_loss': 0.01027148962020874, 'eval_runtime': 0.4547, 'eval_samples_per_second': 39.585, 'eval_steps_per_second': 6.598, 'epoch': 160.0}
+{'loss': 0.0103, 'grad_norm': 0.015609092079102993, 'learning_rate': 0.00023, 'epoch': 170.0}
+{'loss': 0.0102, 'grad_norm': 0.012225569225847721, 'learning_rate': 0.00021999999999999995, 'epoch': 180.0}
+{'eval_loss': 0.010230337269604206, 'eval_runtime': 0.4608, 'eval_samples_per_second': 39.066, 'eval_steps_per_second': 6.511, 'epoch': 180.0}
+{'loss': 0.0102, 'grad_norm': 0.016500918194651604, 'learning_rate': 0.00020999999999999998, 'epoch': 190.0}
+{'loss': 0.0102, 'grad_norm': 0.012901357375085354, 'learning_rate': 0.00019999999999999998, 'epoch': 200.0}
+{'eval_loss': 0.010201620869338512, 'eval_runtime': 0.4609, 'eval_samples_per_second': 39.058, 'eval_steps_per_second': 6.51, 'epoch': 200.0}
+{'loss': 0.0102, 'grad_norm': 0.016246125102043152, 'learning_rate': 0.00018999999999999998, 'epoch': 210.0}
+{'loss': 0.0102, 'grad_norm': 0.01567859761416912, 'learning_rate': 0.00017999999999999998, 'epoch': 220.0}
+{'eval_loss': 0.010226506739854813, 'eval_runtime': 0.4575, 'eval_samples_per_second': 39.345, 'eval_steps_per_second': 6.558, 'epoch': 220.0}
+{'loss': 0.0102, 'grad_norm': 0.012129202485084534, 'learning_rate': 0.00016999999999999999, 'epoch': 230.0}
+{'loss': 0.0102, 'grad_norm': 0.010621589608490467, 'learning_rate': 0.00015999999999999999, 'epoch': 240.0}
+{'eval_loss': 0.010202857665717602, 'eval_runtime': 0.4584, 'eval_samples_per_second': 39.265, 'eval_steps_per_second': 6.544, 'epoch': 240.0}
+{'loss': 0.0102, 'grad_norm': 0.01134431641548872, 'learning_rate': 0.00015, 'epoch': 250.0}
+{'loss': 0.0102, 'grad_norm': 0.011167841032147408, 'learning_rate': 0.00014, 'epoch': 260.0}
+{'eval_loss': 0.010199262760579586, 'eval_runtime': 0.4615, 'eval_samples_per_second': 39.001, 'eval_steps_per_second': 6.5, 'epoch': 260.0}
+{'loss': 0.0101, 'grad_norm': 0.011225485242903233, 'learning_rate': 0.00013, 'epoch': 270.0}
+{'loss': 0.0102, 'grad_norm': 0.0072171310894191265, 'learning_rate': 0.00011999999999999999, 'epoch': 280.0}
+{'eval_loss': 0.010193164460361004, 'eval_runtime': 0.4524, 'eval_samples_per_second': 39.788, 'eval_steps_per_second': 6.631, 'epoch': 280.0}
+{'loss': 0.0102, 'grad_norm': 0.008059308864176273, 'learning_rate': 0.00010999999999999998, 'epoch': 290.0}
+{'loss': 0.0102, 'grad_norm': 0.010808330029249191, 'learning_rate': 9.999999999999999e-05, 'epoch': 300.0}
+{'eval_loss': 0.010222554206848145, 'eval_runtime': 0.4574, 'eval_samples_per_second': 39.355, 'eval_steps_per_second': 6.559, 'epoch': 300.0}
+{'loss': 0.0102, 'grad_norm': 0.008495228365063667, 'learning_rate': 8.999999999999999e-05, 'epoch': 310.0}
+{'loss': 0.0102, 'grad_norm': 0.00930024590343237, 'learning_rate': 7.999999999999999e-05, 'epoch': 320.0}
+{'eval_loss': 0.010454045608639717, 'eval_runtime': 0.4502, 'eval_samples_per_second': 39.981, 'eval_steps_per_second': 6.663, 'epoch': 320.0}
+{'loss': 0.0102, 'grad_norm': 0.009589203633368015, 'learning_rate': 7e-05, 'epoch': 330.0}
+{'loss': 0.0102, 'grad_norm': 0.00832361914217472, 'learning_rate': 5.9999999999999995e-05, 'epoch': 340.0}
+{'eval_loss': 0.010283468291163445, 'eval_runtime': 0.4321, 'eval_samples_per_second': 41.657, 'eval_steps_per_second': 6.943, 'epoch': 340.0}
+{'loss': 0.0102, 'grad_norm': 0.008063760586082935, 'learning_rate': 4.9999999999999996e-05, 'epoch': 350.0}
+{'loss': 0.0102, 'grad_norm': 0.00791251566261053, 'learning_rate': 3.9999999999999996e-05, 'epoch': 360.0}
+{'eval_loss': 0.010231117717921734, 'eval_runtime': 0.4504, 'eval_samples_per_second': 39.96, 'eval_steps_per_second': 6.66, 'epoch': 360.0}
+{'loss': 0.0101, 'grad_norm': 0.008040743879973888, 'learning_rate': 2.9999999999999997e-05, 'epoch': 370.0}
+{'loss': 0.0101, 'grad_norm': 0.0075465538538992405, 'learning_rate': 1.9999999999999998e-05, 'epoch': 380.0}
+{'eval_loss': 0.010370776057243347, 'eval_runtime': 0.4409, 'eval_samples_per_second': 40.827, 'eval_steps_per_second': 6.804, 'epoch': 380.0}
+{'loss': 0.0102, 'grad_norm': 0.005508215166628361, 'learning_rate': 9.999999999999999e-06, 'epoch': 390.0}
+{'loss': 0.0101, 'grad_norm': 0.006547235883772373, 'learning_rate': 0.0, 'epoch': 400.0}
+{'eval_loss': 0.010211667977273464, 'eval_runtime': 0.4634, 'eval_samples_per_second': 38.844, 'eval_steps_per_second': 6.474, 'epoch': 400.0}
+{'train_runtime': 422.0698, 'train_samples_per_second': 121.307, 'train_steps_per_second': 0.948, 'train_loss': 0.11734777603298426, 'epoch': 400.0}
+Saving Model...
+Merging model...
+Saving merged model...
+Saving README.md...
+
+*** Training Chatkokkos Refinement ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_refinement.json train
+Setting               Value
+--------------------  ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+data_file             C2_Kokkos_Dataset/kokkos_create_context_refinement.json
+base_model_path       basemodels/CodeLlama-7b-hf
+finetuned_model_path  output/1_ChatKokko_refinement_peft_adapter
+merged_model_path     output/2_ChatKokko_refinement_merged_adapters
+training_output_dir   output/0_ChatKokko_refinement_training_checkpoints
+max_training_tokens   600
+max_response_tokens   600
+prompt_history_file   ~/.chathpc_history
+prompt_template_file  prompt_template.txt
+prompt_template       You are a powerful LLM model for Kokkos called ChatKokkos created by ORNL. Your job is to answer questions about the Kokkos programming model. You are given a question and context regarding the Kokkos programming model.
+
+                      You must output the answer the question.
+                      {% if context %}
+                      ### Context:
+                      {{ context }}
+                      {% endif %}
+                      ### Question:
+                      {{ prompt }}
+
+                      ### Answer:
+                      {{ response }}
+use_wandb             False
+filename              config_refinement.json
+trainable params: 16,777,216 || all params: 6,755,323,904 || trainable%: 0.2484
+multiple gpus detected!
+compiling the model
+{'loss': 1.1577, 'grad_norm': 0.1775844544172287, 'learning_rate': 2.9999999999999997e-05, 'epoch': 10.0}
+{'loss': 1.0884, 'grad_norm': 0.22071629762649536, 'learning_rate': 5.9999999999999995e-05, 'epoch': 20.0}
+{'eval_loss': 1.019142985343933, 'eval_runtime': 0.753, 'eval_samples_per_second': 35.856, 'eval_steps_per_second': 5.312, 'epoch': 20.0}
+{'loss': 0.8917, 'grad_norm': 0.23349739611148834, 'learning_rate': 8.999999999999999e-05, 'epoch': 30.0}
+{'loss': 0.5534, 'grad_norm': 0.2782297432422638, 'learning_rate': 0.00011999999999999999, 'epoch': 40.0}
+{'eval_loss': 0.3287977874279022, 'eval_runtime': 0.7709, 'eval_samples_per_second': 35.023, 'eval_steps_per_second': 5.189, 'epoch': 40.0}
+{'loss': 0.2193, 'grad_norm': 0.13499492406845093, 'learning_rate': 0.00015, 'epoch': 50.0}
+{'loss': 0.0956, 'grad_norm': 0.1355983018875122, 'learning_rate': 0.00017999999999999998, 'epoch': 60.0}
+{'eval_loss': 0.0620485357940197, 'eval_runtime': 0.745, 'eval_samples_per_second': 36.243, 'eval_steps_per_second': 5.369, 'epoch': 60.0}
+{'loss': 0.0498, 'grad_norm': 0.060779228806495667, 'learning_rate': 0.00020999999999999998, 'epoch': 70.0}
+{'loss': 0.0359, 'grad_norm': 0.04868254065513611, 'learning_rate': 0.00023999999999999998, 'epoch': 80.0}
+{'eval_loss': 0.03268551081418991, 'eval_runtime': 0.8143, 'eval_samples_per_second': 33.157, 'eval_steps_per_second': 4.912, 'epoch': 80.0}
+{'loss': 0.0303, 'grad_norm': 0.05862988159060478, 'learning_rate': 0.00027, 'epoch': 90.0}
+{'loss': 0.0262, 'grad_norm': 0.040670234709978104, 'learning_rate': 0.0003, 'epoch': 100.0}
+{'eval_loss': 0.024232544004917145, 'eval_runtime': 0.7698, 'eval_samples_per_second': 35.075, 'eval_steps_per_second': 5.196, 'epoch': 100.0}
+{'loss': 0.0195, 'grad_norm': 0.03034648858010769, 'learning_rate': 0.00029, 'epoch': 110.0}
+{'loss': 0.0114, 'grad_norm': 0.030568735674023628, 'learning_rate': 0.00028, 'epoch': 120.0}
+{'eval_loss': 0.011029748246073723, 'eval_runtime': 0.7864, 'eval_samples_per_second': 34.334, 'eval_steps_per_second': 5.087, 'epoch': 120.0}
+{'loss': 0.0108, 'grad_norm': 0.027048788964748383, 'learning_rate': 0.00027, 'epoch': 130.0}
+{'loss': 0.0105, 'grad_norm': 0.02246020920574665, 'learning_rate': 0.00026, 'epoch': 140.0}
+{'eval_loss': 0.010438811033964157, 'eval_runtime': 0.7741, 'eval_samples_per_second': 34.881, 'eval_steps_per_second': 5.168, 'epoch': 140.0}
+{'loss': 0.0104, 'grad_norm': 0.016613846644759178, 'learning_rate': 0.00025, 'epoch': 150.0}
+{'loss': 0.0104, 'grad_norm': 0.014275498688220978, 'learning_rate': 0.00023999999999999998, 'epoch': 160.0}
+{'eval_loss': 0.010373962111771107, 'eval_runtime': 0.8095, 'eval_samples_per_second': 33.352, 'eval_steps_per_second': 4.941, 'epoch': 160.0}
+{'loss': 0.0104, 'grad_norm': 0.014770193956792355, 'learning_rate': 0.00023, 'epoch': 170.0}
+{'loss': 0.0104, 'grad_norm': 0.008249727077782154, 'learning_rate': 0.00021999999999999995, 'epoch': 180.0}
+{'eval_loss': 0.010448792017996311, 'eval_runtime': 0.7634, 'eval_samples_per_second': 35.368, 'eval_steps_per_second': 5.24, 'epoch': 180.0}
+{'loss': 0.0104, 'grad_norm': 0.012309852987527847, 'learning_rate': 0.00020999999999999998, 'epoch': 190.0}
+{'loss': 0.0103, 'grad_norm': 0.010559901595115662, 'learning_rate': 0.00019999999999999998, 'epoch': 200.0}
+{'eval_loss': 0.0103504229336977, 'eval_runtime': 0.8165, 'eval_samples_per_second': 33.069, 'eval_steps_per_second': 4.899, 'epoch': 200.0}
+{'loss': 0.0104, 'grad_norm': 0.012625055387616158, 'learning_rate': 0.00018999999999999998, 'epoch': 210.0}
+{'loss': 0.0104, 'grad_norm': 0.010584715753793716, 'learning_rate': 0.00017999999999999998, 'epoch': 220.0}
+{'eval_loss': 0.010366714559495449, 'eval_runtime': 0.8067, 'eval_samples_per_second': 33.47, 'eval_steps_per_second': 4.958, 'epoch': 220.0}
+{'loss': 0.0104, 'grad_norm': 0.0076049985364079475, 'learning_rate': 0.00016999999999999999, 'epoch': 230.0}
+{'loss': 0.0103, 'grad_norm': 0.010469140484929085, 'learning_rate': 0.00015999999999999999, 'epoch': 240.0}
+{'eval_loss': 0.010421370156109333, 'eval_runtime': 0.7424, 'eval_samples_per_second': 36.369, 'eval_steps_per_second': 5.388, 'epoch': 240.0}
+{'loss': 0.0103, 'grad_norm': 0.009813924320042133, 'learning_rate': 0.00015, 'epoch': 250.0}
+{'loss': 0.0103, 'grad_norm': 0.011395422741770744, 'learning_rate': 0.00014, 'epoch': 260.0}
+{'eval_loss': 0.010429567657411098, 'eval_runtime': 0.741, 'eval_samples_per_second': 36.44, 'eval_steps_per_second': 5.398, 'epoch': 260.0}
+{'loss': 0.0103, 'grad_norm': 0.01191109512001276, 'learning_rate': 0.00013, 'epoch': 270.0}
+{'loss': 0.0103, 'grad_norm': 0.014077585190534592, 'learning_rate': 0.00011999999999999999, 'epoch': 280.0}
+{'eval_loss': 0.010448173619806767, 'eval_runtime': 0.7917, 'eval_samples_per_second': 34.103, 'eval_steps_per_second': 5.052, 'epoch': 280.0}
+{'loss': 0.0103, 'grad_norm': 0.011155345477163792, 'learning_rate': 0.00010999999999999998, 'epoch': 290.0}
+{'loss': 0.0103, 'grad_norm': 0.014573129825294018, 'learning_rate': 9.999999999999999e-05, 'epoch': 300.0}
+{'eval_loss': 0.010393204167485237, 'eval_runtime': 0.7909, 'eval_samples_per_second': 34.137, 'eval_steps_per_second': 5.057, 'epoch': 300.0}
+{'loss': 0.0103, 'grad_norm': 0.008055168204009533, 'learning_rate': 8.999999999999999e-05, 'epoch': 310.0}
+{'loss': 0.0103, 'grad_norm': 0.007702151779085398, 'learning_rate': 7.999999999999999e-05, 'epoch': 320.0}
+{'eval_loss': 0.010492300614714622, 'eval_runtime': 0.7614, 'eval_samples_per_second': 35.461, 'eval_steps_per_second': 5.254, 'epoch': 320.0}
+{'loss': 0.0103, 'grad_norm': 0.007248776499181986, 'learning_rate': 7e-05, 'epoch': 330.0}
+{'loss': 0.0103, 'grad_norm': 0.008119375444948673, 'learning_rate': 5.9999999999999995e-05, 'epoch': 340.0}
+{'eval_loss': 0.01035927701741457, 'eval_runtime': 0.7853, 'eval_samples_per_second': 34.381, 'eval_steps_per_second': 5.093, 'epoch': 340.0}
+{'loss': 0.0103, 'grad_norm': 0.007100387942045927, 'learning_rate': 4.9999999999999996e-05, 'epoch': 350.0}
+{'loss': 0.0103, 'grad_norm': 0.010182442143559456, 'learning_rate': 3.9999999999999996e-05, 'epoch': 360.0}
+{'eval_loss': 0.010397125966846943, 'eval_runtime': 0.7496, 'eval_samples_per_second': 36.021, 'eval_steps_per_second': 5.336, 'epoch': 360.0}
+{'loss': 0.0103, 'grad_norm': 0.00671499315649271, 'learning_rate': 2.9999999999999997e-05, 'epoch': 370.0}
+{'loss': 0.0103, 'grad_norm': 0.005782232154160738, 'learning_rate': 1.9999999999999998e-05, 'epoch': 380.0}
+{'eval_loss': 0.010330324061214924, 'eval_runtime': 0.8173, 'eval_samples_per_second': 33.036, 'eval_steps_per_second': 4.894, 'epoch': 380.0}
+{'loss': 0.0103, 'grad_norm': 0.004881451837718487, 'learning_rate': 9.999999999999999e-06, 'epoch': 390.0}
+{'loss': 0.0103, 'grad_norm': 0.005716483108699322, 'learning_rate': 0.0, 'epoch': 400.0}
+{'eval_loss': 0.010410266928374767, 'eval_runtime': 0.7927, 'eval_samples_per_second': 34.061, 'eval_steps_per_second': 5.046, 'epoch': 400.0}
+{'train_runtime': 764.8703, 'train_samples_per_second': 66.939, 'train_steps_per_second': 0.523, 'train_loss': 0.11173264233395458, 'epoch': 400.0}
+Saving Model...
+Merging model...
+Saving merged model...
+Saving README.md...
+
+Running 3_verify.sh
+*** Running 3_verify.sh ***
+
+*** Ensure commands are running in correct directory. ***
+cd ~/ChatHPC-ChatKokkos-SC25
+
+*** Verifying Chatkokkos Initial ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_initial.json verify
+Total mismatches: 0
+
+*** Verifying Chatkokkos Refinement ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_refinement.json verify
+Total mismatches: 0
+
+Running 4_evaluate.sh
+*** Running 4_evaluate.sh ***
+
+*** Ensure commands are running in correct directory. ***
+cd ~/ChatHPC-ChatKokkos-SC25
+
+*** Evaluating Chatkokkos Initial ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_initial.json test --save_results_file evaluation/ChatKokkos_initial_results.json C2_Kokkos_Dataset/kokkos_testing.yaml
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc-data-to-md evaluation/ChatKokkos_initial_results.json > evaluation/ChatKokkos_initial_results.md
+
+*** Evaluating Chatkokkos Refinement ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_refinement.json test --save_results_file evaluation/ChatKokkos_refinement_results.json C2_Kokkos_Dataset/kokkos_testing.yaml
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc-data-to-md evaluation/ChatKokkos_refinement_results.json > evaluation/ChatKokkos_refinement_results.md
+
+Running 5_evaluate_baseline.sh
+*** Running 5_evaluate_baseline.sh ***
+
+*** Ensure commands are running in correct directory. ***
+cd ~/ChatHPC-ChatKokkos-SC25
+
+*** Evaluate code-llama base model ***
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc --config config_initial.json base test --save_results_file evaluation/code_llama_base_results.json C2_Kokkos_Dataset/kokkos_testing.yaml
+uv run --project C1_ChatHPC_Lib/ChatHPC-app-v25.4.1 chathpc-data-to-md evaluation/code_llama_base_results.json > evaluation/code_llama_base_results.md
+
+*** Evaluate OpenAI gpt-4o base model ***
+Error: OPENAI_API_KEY is not set.
+Please export your key if you would like to evauate the OpenAI gpt-4o base model.
+export OPENAI_API_KEY=your-key-here
